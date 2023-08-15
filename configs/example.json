@@ -1,0 +1,24 @@
+{
+    "Some_Integer": -2,
+    "Some_String": "foo",
+    "Subdata": {
+        "Sub": 13,
+        "SubDict": {
+            "SubSubValue": "FOOBAR"
+        }
+    },
+    "Sublist": [
+        "1",
+        "2",
+        "45"
+    ],
+    "Prefilled_Sublist": [
+        "Hello",
+        "My"
+    ],
+    "Prefilled_Validated": [
+        1,
+        2,
+        -1
+    ]
+}

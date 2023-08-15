@@ -1,17 +1,23 @@
-# TD-Prefab
-This project can be used as a boilerplate to base future projects off of.
+## TD DevUtils
 
 # Description
-Tell us something about this project.
+A collection of components that, in themself, do not do a lot, but can be a great help in creating projects.
 
 # Version
-2022.28040
+2022.33600
 
-# Notes
-Never have anything config, log or similiar related inside the repository.
-Do not push to this repository with any kind of project related stuff.
-Us this only as a boilerplate.
-# External
-This prefab implements TD_Completes by picturesbyrobots.
-To make full use of it folow install-insntructions.
-https://github.com/picturesbyrobots/td-completes-me
+### Components
+# callbackManager
+A component to easily decouple callback from main functionality.
+
+# folder
+quick access to some of the most generic folders.
+
+# jsonCOnfig
+Extensive Callbackbased JSON COnfigugration.
+
+# OP Store
+A explicit place to store refferences to operator.
+
+# Repo Maker
+Storing data outside the functionality of a component was never that easy!
