@@ -2,13 +2,13 @@
 Name : shortcut
 Author : Wieland@AMB-ZEPH15
 Version : 0
-Build : 2
-Savetimestamp : 2023-08-15T13:22:28.104608
+Build : 3
+Savetimestamp : 2023-08-15T14:35:41.880630
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
-from os import path
 
+import pathlib
 class path_shortcut:
     def __init__(self, directory) -> None:
         self.directory = directory
@@ -20,5 +20,8 @@ class path_shortcut:
     def __repr__(self) -> str:
         return self.directory
 
-    def __call__(self, *args: str) -> str:
-        return path.join(self.directory, *args).replace("\\", "/")
+    def __call__(self, *args: str, createParent = False, createPath = False) -> pathlib.Path:
+        pathObject = pathlib.Path(*args)
+        if createParent: pathObject.parent.mkdir( parents = True, exist_ok=True)
+        if createPath: pathObject.mkdir( parents = True, exist_ok=True)
+        return pathObject

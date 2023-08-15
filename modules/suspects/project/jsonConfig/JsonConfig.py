@@ -5,12 +5,13 @@
 Name : JsonConfig
 Author : Wieland@AMB-ZEPH15
 Version : 0
-Build : 6
-Savetimestamp : 2023-02-24T13:14:41.209464
+Build : 7
+Savetimestamp : 2023-08-15T15:02:00.633264
 Saveorigin : Project.toe
-Saveversion : 2022.28040
+Saveversion : 2022.32660
 Info Header End'''
-import config_module, os, json
+import config_module, json
+import pathlib
 
 class JsonConfig:
 	"""
@@ -19,26 +20,36 @@ class JsonConfig:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
-		self.config_module = config_module
-		self.filepath = "config.json"
+		self.log = self.ownerComp.op("logger").Log
+		self.log("Init")
+		self.ConfigModule = config_module
 		self.Refresh_File()
 
+	@property
 	def Filepath(self):
-		path = self.ownerComp.par.Filepath.eval()
-		if not self.ownerComp.par.Useenv.eval(): return path
-		info = tdu.FileInfo( path )
-		new_name = f"{self.ownerComp.par.Currentenv.eval()}_{info.baseName}"
-		return os.path.join( info.dir, new_name)
+		self.log("Generating Filepath")
+		path = pathlib.Path( self.ownerComp.par.Filepath.eval() )
+		path.parent.mkdir( parents=True, exist_ok=True )
+		if self.ownerComp.par.Useenv.eval():
+			path = path.with_stem(f"{self.ownerComp.par.Currentenv.eval()}_{info.baseName}")
+		path.touch()
+		return path
 
 	def Refresh_File(self):
-		self.Data = self.Load_From_Json( self.ownerComp.op("config_json").text or "{}")
+		self.log("Refreshing File")
+		with open( self.Filepath, "rt" ) as configFile:
+			self.Data = self.Load_From_Json( configFile.read() or "{}")
+		if self.ownerComp.extensionsReady : self.ownerComp.cook( force = True )
 		self.Save()
 
 	def Save(self):
-		self.ownerComp.op("config_json").text = self.Data.To_Json()
+		self.log("Saving File")
+		with open( self.Filepath, "wt" ) as configFile:
+			configFile.write( self.Data.To_Json() )
 		
 
 	def Load_From_Json(self, json_string):
+		self.log( "Loading Json String", json)
 		return self.Load_From_Dict( json.loads( json_string))
 
 	def Load_From_Dict(self, datadict:dict):
@@ -47,5 +58,4 @@ class JsonConfig:
 		)
 		data = config_module.Collection( schema )
 		data.Set( datadict )
-		self.ownerComp.cook( force = True)
 		return data
