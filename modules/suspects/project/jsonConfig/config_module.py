@@ -1,13 +1,11 @@
 
 
+
 '''Info Header Start
 Name : config_module
 Author : Wieland@AMB-ZEPH15
-Version : 0
-Build : 5
-Savetimestamp : 2023-03-14T09:38:16.161322
 Saveorigin : Project.toe
-Saveversion : 2022.28040
+Saveversion : 2022.32660
 Info Header End'''
 
 class ConfigValue:

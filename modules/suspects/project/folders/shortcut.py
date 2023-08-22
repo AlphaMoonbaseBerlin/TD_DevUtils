@@ -1,9 +1,7 @@
+
 '''Info Header Start
 Name : shortcut
 Author : Wieland@AMB-ZEPH15
-Version : 0
-Build : 3
-Savetimestamp : 2023-08-15T14:35:41.880630
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''

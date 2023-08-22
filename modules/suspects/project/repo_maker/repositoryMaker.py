@@ -1,9 +1,7 @@
+
 '''Info Header Start
 Name : repositoryMaker
 Author : Wieland@AMB-ZEPH15
-Version : 0
-Build : 2
-Savetimestamp : 2023-08-15T13:23:02.436191
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''

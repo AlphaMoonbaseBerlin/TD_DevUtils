@@ -1,9 +1,7 @@
+
 '''Info Header Start
 Name : extStore
 Author : Wieland@AMB-ZEPH15
-Version : 0
-Build : 2
-Savetimestamp : 2023-08-15T13:24:15.618142
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''

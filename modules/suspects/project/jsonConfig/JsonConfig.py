@@ -1,12 +1,10 @@
 
 
 
+
 '''Info Header Start
 Name : JsonConfig
 Author : Wieland@AMB-ZEPH15
-Version : 0
-Build : 7
-Savetimestamp : 2023-08-15T15:02:00.633264
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
