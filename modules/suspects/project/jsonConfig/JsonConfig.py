@@ -1,14 +1,11 @@
 
-
-
-
-
 '''Info Header Start
 Name : JsonConfig
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
+
 import config_module, json
 import pathlib
 
@@ -34,10 +31,16 @@ class JsonConfig:
 		path.touch()
 		return path
 
+	def readFileJson(self):
+		with open( self.Filepath, "rt" ) as configFile:
+			return configFile.read()
+		
 	def Refresh_File(self):
 		self.log("Refreshing File")
-		with open( self.Filepath, "rt" ) as configFile:
-			self.Data = self.Load_From_Json( configFile.read() or "{}")
+		self.Data = self.Load_From_Json( 
+			self.ownerComp.op("callbackManager").Do_Callback("GetConfigData") or
+			self.readFileJson() or 
+			"{}" )
 		if self.ownerComp.extensionsReady : self.ownerComp.cook( force = True )
 		self.Save()
 
@@ -53,7 +56,7 @@ class JsonConfig:
 
 	def Load_From_Dict(self, datadict:dict):
 		schema = config_module.Collection(
-			self.ownerComp.op("callbackManager").Execute("GetConfigSchema")( config_module.ConfigValue, config_module.CollectionDict, config_module.CollectionList) 
+			self.ownerComp.op("callbackManager").Do_Callback("GetConfigSchema", config_module.ConfigValue, config_module.CollectionDict, config_module.CollectionList) or {}
 		)
 		data = config_module.Collection( schema )
 		data.Set( datadict )
