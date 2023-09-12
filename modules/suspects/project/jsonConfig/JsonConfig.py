@@ -18,8 +18,12 @@ class JsonConfig:
 		self.ownerComp = ownerComp
 		self.log = self.ownerComp.op("logger").Log
 		self.log("Init")
+		
 		self.ConfigModule = config_module
-		self.Refresh_File()
+		self.LoadConfig()
+
+		#backwards compatible 
+		self.Refresh_File = self.LoadConfig
 
 	@property
 	def Filepath(self):
@@ -35,9 +39,10 @@ class JsonConfig:
 		with open( self.Filepath, "rt" ) as configFile:
 			return configFile.read()
 		
-	def Refresh_File(self):
+	def LoadConfig(self, configString = ""):
 		self.log("Refreshing File")
-		self.Data = self.Load_From_Json( 
+		self.Data = self.loadFromJson( 
+			configString or
 			self.ownerComp.op("callbackManager").Do_Callback("GetConfigData") or
 			self.readFileJson() or 
 			"{}" )
@@ -50,11 +55,11 @@ class JsonConfig:
 			configFile.write( self.Data.To_Json() )
 		
 
-	def Load_From_Json(self, json_string):
+	def loadFromJson(self, json_string):
 		self.log( "Loading Json String", json)
-		return self.Load_From_Dict( json.loads( json_string))
+		return self.loadFromDict( json.loads( json_string))
 
-	def Load_From_Dict(self, datadict:dict):
+	def loadFromDict(self, datadict:dict):
 		schema = config_module.Collection(
 			self.ownerComp.op("callbackManager").Do_Callback("GetConfigSchema", config_module.ConfigValue, config_module.CollectionDict, config_module.CollectionList) or {}
 		)
