@@ -21,54 +21,44 @@ class extCallbackManager:
 		self.ownerComp = ownerComp
 		self.pageName = 'Callbacks'
 		self.callbackTemplate = self.ownerComp.op('default_callbacks')
-		self.callback_module = None
-		TDF.createProperty(self, 'Module_Op', value=self.callbackTemplate, dependable=True,
-						   readOnly=False)
 
-		if hasattr( self.ownerComp.par.Owner.eval().par, "Callbacks"):
-			module_op = self.ownerComp.par.Owner.eval().par.Callbacks.eval() or op('default_callbacks')
-		else:
-			module_op = op('default_callbacks')
-			
-		module_path = module_op.path
-		self.init_callback_module( module_path )
+	@property
+	def owner(self):
+		return self.ownerComp.par.Owner.eval()
+	
+	@property
+	def moduleOperator(self):
+		return self.owner.par.Callbacks.eval()
+	
+	@property
+	def callbackModule(self):
+		return self.moduleOperator.module
+	  
+	def Reset(self):
+		self.owner.owner.par.Callbacks = self.callbackTemplate
 
-	def init_callback_module(self, path):
-		self.Module_Op = op( path )
-		self.callback_module = mod( path )
+	def Refresh(self):
 		self.Execute.cache_clear()
-		return
 
-	def InitOwner(self, owner):
+	def InitOwner(self):
 		prefab = { parameter.name : TDJSON.parameterToJSONPar( parameter ) for parameter  in self.ownerComp.op("parameter_prefab").customPars }
-		
 		try:
-			callbacks_par = TDJSON.addParameterFromJSONDict( owner, prefab["Callbacks"], replace = False )
-			callbacks_par.val = owner.relativePath(self.callbackTemplate)
+			callbacks_par = TDJSON.addParameterFromJSONDict( self.owner, prefab["Callbacks"], replace = False )
+			callbacks_par.val = self.owner.relativePath(self.callbackTemplate)
 		except tdError:
 			pass
 
 		try:
-			create_par = TDJSON.addParameterFromJSONDict( owner, prefab["Createcallbacks"], replace = False )
+			create_par = TDJSON.addParameterFromJSONDict( self.owner, prefab["Createcallbacks"], replace = False )
 		except tdError:
 			pass
-		
-			
-		
-		return
-		#page = owner.appendCustomPage(self.pageName)
-		#page.appendPulse('Createcallbacks', label = 'Create Callbacks', replace = True)
-		#datpar = getattr( owner.par, "Callbacks", page.appendDAT('Callbacks', replace = True)[0] )
-		#datpar.readOnly = True
-		#callbackpath = owner.relativePath(self.callbackTemplate)
-		#datpar.val = datpar.eval() or callbackpath
 
 	def empty_callback(self, *args, **kwargs):
 		return
 	
 	@lru_cache(maxsize=None)
 	def Execute(self, name):
-		return getattr( self.callback_module, name, self.empty_callback)
+		return getattr( self.callbackModule, name, self.empty_callback)
 
 	def Do_Callback(self, name, *arguments, **keywordarguments):
 		try:
