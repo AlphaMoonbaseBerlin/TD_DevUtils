@@ -58,7 +58,7 @@ class CollectionDict(dict):
         try:
             return self.get( key )
         except KeyError as e:
-            raise TypeError from e
+            raise AttributeError from e
     
     def Set(self, data):
         for key, item in data.items():
