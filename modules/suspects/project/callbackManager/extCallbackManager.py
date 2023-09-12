@@ -35,7 +35,7 @@ class extCallbackManager:
 		return self.moduleOperator.module
 	  
 	def Reset(self):
-		self.owner.owner.par.Callbacks = self.callbackTemplate
+		self.owner.par.Callbacks = self.callbackTemplate
 
 	def Refresh(self):
 		self.Execute.cache_clear()
