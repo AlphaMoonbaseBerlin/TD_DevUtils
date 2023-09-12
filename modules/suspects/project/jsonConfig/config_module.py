@@ -8,7 +8,10 @@ Info Header End'''
 class ConfigValue:
     def _to_json(self):
         return self.Value
-
+    
+    def __call__(self):
+        return copy.deepcopy( self )
+    
     def __repr__(self) -> str:
         return str( self.value.val )
     
@@ -65,6 +68,7 @@ class CollectionDict(dict):
             if key in self: self[key].Set( item )
 
 import copy
+from typing import Any
 
 class CollectionList(list):
     def __init__(self,items:list = None, default_member = None, comment = ""):
