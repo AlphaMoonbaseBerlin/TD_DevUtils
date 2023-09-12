@@ -55,7 +55,10 @@ class CollectionDict(dict):
         if items: self.update( items )
         
     def __getattr__(self, key):
-        return self.get( key )
+        try:
+            return self.get( key )
+        except KeyError as e:
+            raise TypeError from e
     
     def Set(self, data):
         for key, item in data.items():
@@ -91,7 +94,7 @@ class Collection(CollectionDict):
     def To_Json(self, indent = 4):
         def default( data ):
             if hasattr( data, "_to_json"): return data._to_json()
-            return json.JSONEncoder.default(self, o)
+            return json.JSONEncoder.default(self, data)
         return json.dumps( self, default=default, indent = indent)
     
     def From_Json(self, jsonstring:str):
