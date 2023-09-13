@@ -1,5 +1,4 @@
 
-
 '''Info Header Start
 Name : extConsitentReplicator
 Author : Wieland@AMB-ZEPH15
@@ -18,6 +17,8 @@ class extConsitentReplicator:
 		self.callback = self.ownerComp.op('callbackManager')
 		if self.ownerComp.par.Active.eval(): 
 			run( "me.Replicate()", fromOP=self.ownerComp, delayFrames = 1)
+
+
 	@property
 	def TemplateDAT(self):
 		return self.ownerComp.par.Template.eval()
@@ -36,11 +37,18 @@ class extConsitentReplicator:
 		for replicant in self.findReplicants():
 			replicant.destroy()
 
-	def Replicate(self, preClear = False):
+	def prepareTemplate(self, template:dict):
+		return { key : {
+			**template[key], 
+			**{"_index" : index} }
+			 for index, key in enumerate( template ) }
+
+	def Replicate(self, preClear:bool = False, template:dict = {}):
 		if preClear: self.Clear()
-		template = self.parseDatTemplate()
-		self.huntExistingReplicants(template)
-		self.createMissingReplicants(template)
+		template = template or self.parseDatTemplate()
+		template = self.prepareTemplate( template )
+		self.huntExistingReplicants(	template)
+		self.createMissingReplicants(	template)
 		return
 		
 	def huntExistingReplicants(self, template):
@@ -52,7 +60,7 @@ class extConsitentReplicator:
 		target = self.ownerComp.par.Target.eval()
 		for replicantName, replicantTemplate in template.items():
 			if target.op(replicantName): continue
-			self.createReplicant( replicantTemplate, target )
+			self.createReplicant( replicantName, replicantTemplate, target )
 			
 	def createReplicant(self, name:str, template:dict, target):
 		self.callback.Do_Callback( "onPreCreate", template, self.ownerComp )

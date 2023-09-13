@@ -12,7 +12,7 @@ def tableToDict( tableOperator:td.tableDAT ) -> typing.List[typing.Dict[str,str]
     rows = tableOperator.rows()
     header = [ cell.val for cell in rows.pop(0) ]
     return [
-        { header[index] : cell.val for cell in row} for row in rows
+        { header[index] : cell.val for index,cell in enumerate( row )} for row in rows
     ]
 
 def getHeader(tableOperator:td.tableDAT) -> typing.List[str]:
