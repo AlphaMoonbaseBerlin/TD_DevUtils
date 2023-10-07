@@ -18,16 +18,16 @@ class extCallbackManager:
 	"""
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
-		self.ownerComp = ownerComp
-		self.pageName = 'Callbacks'
-		self.callbackTemplate = self.ownerComp.op('default_callbacks')
+		self.ownerComp : baseCOMP 	= ownerComp
+		self.pageName : str 		= 'Callbacks'
+		self.callbackTemplate : DAT = self.ownerComp.op('default_callbacks')
 
 	@property
-	def owner(self):
+	def owner(self) -> OP:
 		return self.ownerComp.par.Owner.eval()
 	
 	@property
-	def moduleOperator(self):
+	def moduleOperator(self) -> DAT:
 		return self.owner.par.Callbacks.eval()
 	
 	@property
@@ -70,7 +70,8 @@ class extCallbackManager:
 			raise e
 
 	def CreateCallbacks(self, owner):
-		new_callback_dat = owner.parent().copy(self.callbackTemplate, name = f"{owner.name}_callbacks")
+		new_callback_dat = owner.parent().copy(self.ownerComp.op("emptyCallbacks"), name = f"{owner.name}_callbacks")
+		new_callback_dat.text = self.callbackTemplate.text
 		new_callback_dat.nodeX = owner.nodeX
 		new_callback_dat.nodeY = owner.nodeY - 150
 		new_callback_dat.dock = owner

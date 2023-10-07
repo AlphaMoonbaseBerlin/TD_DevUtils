@@ -5,12 +5,14 @@ Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
 
-class ConfigValue:
-    def _to_json(self):
-        return self.Value
-    
+class copyCallable:
     def __call__(self):
         return copy.deepcopy( self )
+
+class ConfigValue(copyCallable):
+    def _to_json(self):
+        return self.Value
+
     
     def __repr__(self) -> str:
         return str( self.value.val )
@@ -52,14 +54,14 @@ class ConfigValue:
         return self.value.val
 
 
-class CollectionDict(dict):
+class CollectionDict(dict, copyCallable):
     def __init__(self, items:dict = None, comment = ""):
         self.comment = comment
         if items: self.update( items )
         
     def __getattr__(self, key):
         try:
-            return self.get( key )
+            return self[key]
         except KeyError as e:
             raise AttributeError from e
     
@@ -70,7 +72,7 @@ class CollectionDict(dict):
 import copy
 from typing import Any
 
-class CollectionList(list):
+class CollectionList(list, copyCallable):
     def __init__(self,items:list = None, default_member = None, comment = ""):
         self.comment = comment
         self.default_member = default_member or ConfigValue()
@@ -91,7 +93,7 @@ class CollectionList(list):
 
 import json
 
-class Collection(CollectionDict):
+class Collection(CollectionDict, copyCallable):
     def __init__(self, items: dict = None):
         super().__init__(items)
     
