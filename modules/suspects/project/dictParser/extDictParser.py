@@ -43,10 +43,13 @@ class extDictParser:
 		return definitionList
 	
 	def AddDict(self, data:dict, unique = True):
-		self.outputTable.appendRow([
-			item.parse( data ) for item in self.getDefintion()
-		])
+		dataset = [ item.parse( data ) for item in self.getDefintion() ]
+		if not dataset: raise Exception("No Definition defined!")
+		if unique and self.outputTable.row( dataset[0] ):
+			self.outputTable.replaceRow( dataset[0], dataset )
+		else:
+			self.outputTable.appendRow( dataset )
 
-	def AddDicts(self, data:List[dict]):
+	def AddDicts(self, data:List[dict], unique = True):
 		for item in data:
-			self.AddDict( item )
+			self.AddDict( item, unique=unique )
