@@ -12,14 +12,21 @@ log = op("logger").Log
 class EntryRequired( Exception):
     pass
 
-@dataclass
+#@dataclass
 class EntryDefinition:
+    """Generates a EntryDefinition for the parser."""
     name        : str
-    parseFunction: Callable
+    parseFunction: Callable[[any], any]
     
     default     : str   = ""
     required    : bool  = False
     
+    def __init__(self, name:str, parseFuncton:Callable[[any], any], default:str = "", required:bool = False):
+        
+        self.name           = name
+        self.parseFunction  = parseFuncton
+        self.default        = default
+        self.required       = required
 
     def parse( self, data:dict ):
         try:
