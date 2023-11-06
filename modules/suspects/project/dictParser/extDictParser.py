@@ -1,6 +1,6 @@
 '''Info Header Start
 Name : extDictParser
-Author : Wieland@AMB-ZEPH15
+Author : wieland@MONOMANGO
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
@@ -53,3 +53,9 @@ class extDictParser:
 	def AddDicts(self, data:List[dict], unique = True):
 		for item in data:
 			self.AddDict( item, unique=unique )
+
+
+	def GetRow(self, rowIndex):
+		return {
+			item.name : item.unparse( str( self.outputTable[ rowIndex, item.name] ) ) for item in self.getDefintion() 
+		}
