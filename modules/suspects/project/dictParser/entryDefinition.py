@@ -1,33 +1,31 @@
 '''Info Header Start
 Name : entryDefinition
-Author : Wieland@AMB-ZEPH15
+Author : wieland@MONOMANGO
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable
 log = op("logger").Log
 
 class EntryRequired( Exception):
     pass
 
-#@dataclass
+def emptyReturn(value):
+    return str( value )
+
+@dataclass
 class EntryDefinition:
     """Generates a EntryDefinition for the parser."""
-    name        : str
-    parseFunction: Callable[[any], any]
+    name            : str                   = field()
     
-    default     : str   = ""
-    required    : bool  = False
+    parseFunction   : Callable[[any], any]  = field(repr = False)
+    returnFunction  : Callable[[str], any]  = field(repr = False, default=emptyReturn)
     
-    def __init__(self, name:str, parseFuncton:Callable[[any], any], default:str = "", required:bool = False):
-        
-        self.name           = name
-        self.parseFunction  = parseFuncton
-        self.default        = default
-        self.required       = required
-
+    default         : str   = field( default = "" )
+    required        : bool  = field( default = False )
+    
     def parse( self, data:dict ):
         try:
             return self.parseFunction( data )
@@ -36,3 +34,5 @@ class EntryDefinition:
             if self.required: raise EntryRequired( e.args )
             else: return self.default
 
+    def unparse(self, value:str):
+        return self.returnFunction( value )
