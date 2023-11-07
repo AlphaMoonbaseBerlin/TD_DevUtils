@@ -1,9 +1,10 @@
 '''Info Header Start
 Name : JsonConfig
-Author : Wieland@AMB-ZEPH15
+Author : wieland@MONOMANGO
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
+
 
 import config_module, json
 import pathlib
@@ -50,9 +51,17 @@ class JsonConfig:
 
 	def Save(self):
 		self.log("Saving File")
+		if self.ownerComp.par.Exportschema.eval():
+			self.saveSchema()
+			self.Data["$schema"] = f"./" + str( self.Filepath.with_suffix(".schema.json" ) )
+
 		with open( self.Filepath, "wt" ) as configFile:
 			configFile.write( self.Data.To_Json() )
-		
+	
+	def saveSchema(self):
+		self.log("Saving Schema")
+		with open( self.Filepath.with_suffix(".schema.json" ), "wt" ) as schemaFile:
+			schemaFile.write( json.dumps( self.Data._GetSchema(), indent = 1 ) )
 
 	def loadFromJson(self, json_string):
 		self.log( "Loading Json String", json)
