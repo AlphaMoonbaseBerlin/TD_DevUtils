@@ -1,13 +1,17 @@
 '''Info Header Start
 Name : extDictParser
-Author : wieland@MONOMANGO
+Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''
 
+
 from functools import lru_cache
 from entryDefinition import EntryDefinition
-from typing import List
+from typing import List, Union, Dict
+
+entryIndex = Union[str, int]
+
 class extDictParser:
 	"""
 	extDictParser description
@@ -55,7 +59,21 @@ class extDictParser:
 			self.AddDict( item, unique=unique )
 
 
-	def GetRow(self, rowIndex):
+	def GetRow(self, rowIndex:entryIndex):
 		return {
 			item.name : item.unparse( str( self.outputTable[ rowIndex, item.name] ) ) for item in self.getDefintion() 
 		}
+	
+	def GetValue(self, rowIndex:entryIndex, itemIndex:entryIndex) -> Dict[str, any]:
+		"""Return a dictionary of the parsed row!"""
+		targetCell:Cell = self.outputTable[ rowIndex, itemIndex ]
+		if not targetCell: return None
+		entryDefinition:EntryDefinition = self.getDefintion[targetCell.col]
+		return entryDefinition.unparse( targetCell.val )
+	
+	def SearchRows(self, searchValue:str, searchCol:entryIndex) -> List[entryIndex]:
+		"""This loads the complete row, which is def not ideal, but usable. Use Index-Tables for quicker search?"""
+		foundCells = [result for result in tdu.match(searchValue, self.outputTable.col(searchCol)[1:] )]
+		return [
+			self.outputTable[ cell.row, 0].val for cell in foundCells
+		]
