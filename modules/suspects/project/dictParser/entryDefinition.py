@@ -1,6 +1,6 @@
 '''Info Header Start
 Name : entryDefinition
-Author : wieland@MONOMANGO
+Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
 Saveversion : 2022.32660
 Info Header End'''

@@ -7,7 +7,7 @@ Info Header End'''
 import ast
 from pathlib import Path
 import re
-
+from stubsTransformer import StubsTransformer
 
 debug = op("logger").Log
 
@@ -19,34 +19,14 @@ class extStubser:
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
 
-	def Stubify(self, input:str) -> str:
+	def Stubify(self, input:str, includePrivate:bool = False, includeUnpromoted:bool = True) -> str:
 		"""Generate a stubified String of a module, removing all unnecesarry elements of functions."""
 		data = ast.parse(input)
-		for node in ast.walk(data):
-			emptyBody = []
-			# let's work only on functions & classes definitions
-			if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-				#Just do FunctionDefinitions!
-				continue
-			if not len(node.body):
-				#If not elements are in the node, skip.
-				continue
-			
-			if hasattr(node.body[0], 'value') and isinstance(node.body[0].value, ast.Str):
-				#Lets assume this ies a doscstring!
-				emptyBody = node.body[:1]
-
-			if node.name == "__init__":
-				for item in node.body:
-					
-					if isinstance(item, ast.Assign) and [ target for target in item.targets if isinstance(target, ast.Attribute)]:
-						emptyBody.append( item )
-					if isinstance(item, ast.AnnAssign) and isinstance( item.target, ast.Attribute):
-						emptyBody.append( item )
-			node.body = emptyBody + [ ast.Pass() ]
-		return ast.unparse(data)
+		transformedData = StubsTransformer( includePrivate, includeUnpromoted).visit( data )
+		
+		return ast.unparse(transformedData)
 	
-	def placeTyping(self, stubsString:str, name:str):
+	def _placeTyping(self, stubsString:str, name:str):
 		"""Export the given stubs string in to a file and add it as a builtins!"""
 		debug("Placing Typings", name)
 		builtinsFile = Path("typings", "__builtins__.pyi")
@@ -64,16 +44,28 @@ class extStubser:
 		stubsFile.write_text( stubsString )
 
 	
-	def StubifyDat(self, target:textDAT):
+	def StubifyDat(self, target:textDAT, includePrivate:bool = False, includeUnpromoted:bool = True):
 		debug( "Stubifying Dat", target.name)
-		self.placeTyping(self.Stubify(target.text), target.name )
+		self._placeTyping(
+			self.Stubify(
+				target.text, 
+				includePrivate=includePrivate, 
+				includeUnpromoted=includeUnpromoted), 
+			target.name )
 
-	def StubifyComp(self, target:COMP):
+	def StubifyComp(self, target:COMP, depth = 1, tag = "stubser", includePrivate:bool = False, includeUnpromoted:bool = True):
 		debug( "Stubifying COMP", target.name )
-		for child in target.findChildren( tags=["stubser"], type=textDAT ):
-			self.StubifyDat( child )
+		for child in target.findChildren( 
+				tags=[ tag ], 
+				type=textDAT, 
+				maxDepth = depth ):
 			
-	def findParPage(self, name):
+			self.StubifyDat( 
+				child, 
+				includePrivate=includePrivate, 
+				includeUnpromoted=includeUnpromoted )
+			
+	def _findParPage(self, name):
 		pagename = name
 		owner = self.ownerComp.par.Owner.eval()
 		for page in owner.customPages:
@@ -82,7 +74,7 @@ class extStubser:
 		return owner.appendCustomPage( pagename )
 
 	def InitOwner(self):
-		page = self.findParPage("Stubser")
+		page = self._findParPage("Stubser")
 		page.appendPulse( 	
 			"Deploystubs",
 			label 		= "Deploy Stubs",
