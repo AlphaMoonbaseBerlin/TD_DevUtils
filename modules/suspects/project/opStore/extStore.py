@@ -15,8 +15,12 @@ class extStore:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
-		self.parseTable( self.ownerComp.op('store_table') )
-		
+		self.parseTable( self.storeTable )
+	
+	@property
+	def storeTable(self):
+		return self.ownerComp.op("repoMaker").Repo
+
 	def parseTable(self, table):
 		for row in table.rows()[1:]:
 			row[0].val = tdu.legalName( row[0].val ).capitalize()
@@ -26,7 +30,7 @@ class extStore:
 	def AddOp(self, operator, shortcut_name = None):
 		shortcut_name = operator.name if shortcut_name is None else shortcut_name
 		path = self.getPath( operator )
-		self.ownerComp.op('store_table').appendRow( [shortcut_name.capitalize(), path] )
+		self.storeTable.appendRow( [shortcut_name.capitalize(), path] )
 	
 	def getOperator(self, path):
 		self.ownerComp.par.Placeholder.val = path
