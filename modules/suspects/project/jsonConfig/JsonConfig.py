@@ -53,7 +53,7 @@ class JsonConfig:
 		self.log("Saving File")
 		if self.ownerComp.par.Exportschema.eval():
 			self.saveSchema()
-			self.Data["$schema"] = f"./" + str( self.Filepath.with_suffix(".schema.json" ) )
+			self.Data["$schema"] = f"./" + str( self.Filepath.with_suffix(".schema.json" ).name )
 
 		with open( self.Filepath, "wt" ) as configFile:
 			configFile.write( self.Data.To_Json() )

@@ -143,13 +143,17 @@ class Collection(CollectionDict, copyCallable):
     
 
     def _GetSchema(self):
+        propertiesDict = {}
+        for key, item in self.items():
+            try:
+                propertiesDict[key] = item._GetSchema()
+            except AttributeError:
+                pass
         return {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://example.com/product.schema.json",
             "title": "Product",
             "description": "A product in the catalog",
             "type": "object",
-            "properties" : {
-                key : item._GetSchema() for key, item in self.items()
-            }
+            "properties" : propertiesDict
         }

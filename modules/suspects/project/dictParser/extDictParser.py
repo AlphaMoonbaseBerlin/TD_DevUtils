@@ -23,15 +23,19 @@ class extDictParser:
 
 	@property
 	def outputTable(self) -> tableDAT:
-		return self.ownerComp.op("data")
-
+		return self.ownerComp.op("output")
+	
+	@property
+	def dataTable(self) -> tableDAT:
+		return self.ownerComp.op("data") 
+	
 	def Refresh(self):
 		self.getDefintion.cache_clear()
 		self.getDefintion()
 		return
 	
-	def Clear(self):
-		self.outputTable.clear(keepFirstRow = True)
+	def Clear(self, keepHeader = True):
+		self.dataTable.clear(keepFirstRow = keepHeader)
 
 	@lru_cache(maxsize=1)
 	def getDefintion(self):
@@ -40,19 +44,20 @@ class extDictParser:
 			EntryDefinition, 
 			self.ownerComp
 		)
-		self.outputTable.clear()
-		self.outputTable.appendRow([
-			definitionItem.name for definitionItem in definitionList
-		])
+		if self.ownerComp.par.Autoreset.eval(): 
+			self.Clear( keepHeader = False )
+			self.dataTable.appendRow([
+				definitionItem.name for definitionItem in definitionList
+			])
 		return definitionList
 	
 	def AddDict(self, data:dict, unique = True):
 		dataset = [ item.parse( data ) for item in self.getDefintion() ]
 		if not dataset: raise Exception("No Definition defined!")
-		if unique and self.outputTable.row( dataset[0] ):
-			self.outputTable.replaceRow( dataset[0], dataset )
+		if unique and self.dataTable.row( dataset[0] ):
+			self.dataTable.replaceRow( dataset[0], dataset )
 		else:
-			self.outputTable.appendRow( dataset )
+			self.dataTable.appendRow( dataset )
 
 	def AddDicts(self, data:List[dict], unique = True):
 		for item in data:
