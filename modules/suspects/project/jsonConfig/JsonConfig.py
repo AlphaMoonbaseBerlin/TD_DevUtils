@@ -6,8 +6,11 @@ Saveversion : 2022.32660
 Info Header End'''
 
 
-import config_module, json
+import json
 import pathlib
+
+import config_module
+
 
 class JsonConfig:
 	"""
@@ -28,10 +31,11 @@ class JsonConfig:
 	@property
 	def Filepath(self):
 		self.log("Generating Filepath")
+		currentEnv = self.ownerComp.par.Currentenv.eval()
 		path = pathlib.Path( self.ownerComp.par.Filepath.eval() )
 		path.parent.mkdir( parents=True, exist_ok=True )
-		if self.ownerComp.par.Useenv.eval():
-			path = path.with_stem(f"{self.ownerComp.par.Currentenv.eval()}_{info.baseName}")
+		if self.ownerComp.par.Useenv.eval() and currentEnv:
+			path = path.with_stem(f"{currentEnv}_{path.name}")
 		path.touch()
 		return path
 
