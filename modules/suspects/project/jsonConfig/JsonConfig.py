@@ -2,7 +2,7 @@
 Name : JsonConfig
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.32660
+Saveversion : 2022.35320
 Info Header End'''
 
 
@@ -73,7 +73,7 @@ class JsonConfig:
 
 	def loadFromDict(self, datadict:dict):
 		schema = config_module.Collection(
-			self.ownerComp.op("callbackManager").Do_Callback("GetConfigSchema", config_module.ConfigValue, config_module.CollectionDict, config_module.CollectionList) or {}
+			self.ownerComp.op("callbackManager").Do_Callback("GetConfigSchema", config_module, self) or {}
 		)
 		data = config_module.Collection( schema )
 		data.Set( datadict )
