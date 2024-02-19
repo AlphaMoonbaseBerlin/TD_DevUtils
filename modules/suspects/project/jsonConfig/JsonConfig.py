@@ -35,7 +35,7 @@ class JsonConfig:
 		path = pathlib.Path( self.ownerComp.par.Filepath.eval() )
 		path.parent.mkdir( parents=True, exist_ok=True )
 		if self.ownerComp.par.Useenv.eval() and currentEnv:
-			path = path.with_stem(f"{currentEnv}_{path.name}")
+			path = path.with_stem(f"{currentEnv}.{path.stem}")
 		path.touch()
 		return path
 

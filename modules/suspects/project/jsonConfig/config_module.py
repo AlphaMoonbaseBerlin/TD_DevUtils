@@ -26,6 +26,7 @@ def _parseTypes( typesOrType ):
 
 
 class EnumValue(_copyCallable):
+    """An Enum value where the given values need to satisfy the allowedValue passed on init."""
     def _to_json(self):
         return self.Value
     
@@ -76,6 +77,8 @@ class EnumValue(_copyCallable):
         }
 
 class ConfigValue(_copyCallable):
+    """A generic value which allows to be bound to. Use .Value to refference the Value
+    and .Dependency to bind to the value."""
     def _to_json(self):
         return self.Value
     def __repr__(self) -> str:
@@ -127,6 +130,7 @@ class ConfigValue(_copyCallable):
 
 
 class CollectionDict(dict, _copyCallable):
+    """A dictionary where all given keys need to be satisfied."""
     def __init__(self, items:dict = None, comment = ""):
         self.comment = comment
         if items: self.update( items )
@@ -155,6 +159,8 @@ import copy
 from typing import Any
 
 class NamedList(dict, _copyCallable):
+    """Represents a Dictionary with an arbitrary number 
+    of keys where the values need to satisfy the default_member."""
     def __init__(self, items:dict = None, default_member = None, comment = ""):
         self.comment = comment
         self.default_member = default_member or ConfigValue()
@@ -175,6 +181,7 @@ class NamedList(dict, _copyCallable):
 
 
 class CollectionList(list, _copyCallable):
+    """Represents a list or array of values which need to fullfill the default_member."""
     def __init__(self,items:list = None, default_member = None, comment = ""):
         self.comment = comment
         self.default_member = default_member or ConfigValue()
