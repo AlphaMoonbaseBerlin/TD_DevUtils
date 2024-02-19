@@ -163,8 +163,15 @@ class NamedList(dict, _copyCallable):
     of keys where the values need to satisfy the default_member."""
     def __init__(self, items:dict = None, default_member = None, comment = ""):
         self.comment = comment
-        self.default_member = default_member or ConfigValue()
+        self.default_member = ConfigValue() if default_member is None else default_member 
         if items: self.Set( items )
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError as e:
+            raise AttributeError from e
+    
 
     def Set(self, data:dict):
         self.clear()
@@ -184,7 +191,7 @@ class CollectionList(list, _copyCallable):
     """Represents a list or array of values which need to fullfill the default_member."""
     def __init__(self,items:list = None, default_member = None, comment = ""):
         self.comment = comment
-        self.default_member = default_member or ConfigValue()
+        self.default_member = ConfigValue() if default_member is None else default_member
         if items: self.Set( items )
 
     def Set(self, data:list):
