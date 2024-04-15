@@ -10,6 +10,12 @@ class _copyCallable:
     def __call__(self):
         return copy.deepcopy( self )
 
+class _dependencyCopyCallable(_copyCallable):
+    def __call__(self, copyCallbacks = True):
+        selfCopy = super().__call__()
+        if copyCallbacks: selfCopy.value.callbacks = copy.deepcopy( self.value.callbacks )
+        return selfCopy
+
 from collections.abc import Iterable
 def _typeToString(typeObject):
     if typeObject is float: return "number"
@@ -25,11 +31,12 @@ def _parseTypes( typesOrType ):
 
 
 
-class EnumValue(_copyCallable):
+class EnumValue(_dependencyCopyCallable):
     """An Enum value where the given values need to satisfy the allowedValue passed on init."""
     def _to_json(self):
         return self.Value
-    
+
+
     def __repr__(self) -> str:
         return str( self.value.val )
     
@@ -76,7 +83,7 @@ class EnumValue(_copyCallable):
             "enum" : self._allowedValues
         }
 
-class ConfigValue(_copyCallable):
+class ConfigValue(_dependencyCopyCallable):
     """A generic value which allows to be bound to. Use .Value to refference the Value
     and .Dependency to bind to the value."""
     def _to_json(self):

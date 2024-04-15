@@ -21,7 +21,7 @@ class JsonConfig:
 		self.ownerComp = ownerComp
 		self.log = self.ownerComp.op("logger").Log
 		self.log("Init")
-		
+		self.Data = {}
 		self.ConfigModule = config_module
 		self.LoadConfig()
 
@@ -61,6 +61,7 @@ class JsonConfig:
 
 		with open( self.Filepath, "wt" ) as configFile:
 			configFile.write( self.Data.To_Json() )
+		#self.log("Saved File", self.Data.To_Json())
 	
 	def saveSchema(self):
 		self.log("Saving Schema")
