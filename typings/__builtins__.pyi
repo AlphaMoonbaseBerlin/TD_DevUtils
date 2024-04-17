@@ -4,3 +4,5 @@ from td import *
 
 from extTest import *
 from dataclassExample import *
+from JsonConfig import *
+from config_module import *

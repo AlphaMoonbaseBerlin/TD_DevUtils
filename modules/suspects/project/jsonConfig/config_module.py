@@ -254,9 +254,12 @@ class Collection(CollectionDict, _copyCallable):
     
 
 from typing import Type
+
+#Typingg Only.
 class SchemaObjects :
-    ConfigValue = Type[ConfigValue]
-    EnumValue = Type[EnumValue]
-    NamedList = Type[NamedList]
-    CollectionDict = Type[CollectionDict]
-    CollectionList = Type[CollectionList]
+    ConfigValue : Type[ConfigValue]
+    EnumValue : Type[EnumValue]
+    NamedList : Type[NamedList]
+    CollectionDict : Type[CollectionDict]
+    CollectionList : Type[CollectionList]
+
