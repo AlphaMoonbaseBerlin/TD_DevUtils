@@ -2,7 +2,7 @@
 Name : repositoryMaker
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.32660
+Saveversion : 2022.35320
 Info Header End'''
 
 class repositoryMaker:
@@ -32,11 +32,11 @@ class repositoryMaker:
 	
 	@property
 	def OperatorParName(self):
-		return f"{self.ownerName.capitalize()}repositorie"
+		return f"{self.ownerName.capitalize()}repo"
 
 	@property
 	def CreateParName(self):
-		return f"{self.ownerName.capitalize()}create"
+		return f"{self.ownerName.capitalize()}repocreate"
 
 	@property
 	def Owner(self):
@@ -86,7 +86,7 @@ class repositoryMaker:
 		return
 
 	def find_repo_page(self):
-		pagename = self.Owner.par.Pagename.eval() or "Repositorie"
+		pagename = self.Owner.par.Pagename.eval() or "Repository"
 		for page in self.Owner.customPages:
 			if page.name == pagename:
 				return page
