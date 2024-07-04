@@ -18,12 +18,12 @@ class repositoryMaker:
 
 	def InitOwner(self):
 		page = self.find_repo_page()
-		opParaeter = page.appendOP( 		
+		opParameter = page.appendOP( 		
 			self.OperatorParName,
 			label = self.ownerName, 
 			replace=True)
-		opParaeter.val = self.prefabOperator
-		opParaeter[0].startSection  = True
+		opParameter.val = self.prefabOperator
+		opParameter[0].startSection  = True
 		page.appendPulse( 	
 			self.CreateParName,
 			label = "Create", 
@@ -57,13 +57,13 @@ class repositoryMaker:
 	@property
 	def Repo(self):
 		if self.Initialized:
-			if self.Owner.par.Autocreate.eval() and self.repoParameterVal == self.prefabOperator: self.Create_Repo()
+			if self.ownerComp.par.Autocreate.eval() and self.repoParameterVal == self.prefabOperator: self.Create_Repo()
 			return self.repoParameterVal
 		return None
 
 	@property
 	def prefabOperator(self):
-		return self.Owner.par.Prefab.eval()
+		return self.ownerComp.par.Prefab.eval()
 
 	@property
 	def Initialized(self):
@@ -86,7 +86,7 @@ class repositoryMaker:
 		return
 
 	def find_repo_page(self):
-		pagename = self.Owner.par.Pagename.eval() or "Repository"
+		pagename = self.ownerComp.par.Pagename.eval() or "Repository"
 		for page in self.Owner.customPages:
 			if page.name == pagename:
 				return page
