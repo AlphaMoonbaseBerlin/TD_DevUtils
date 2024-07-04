@@ -2,7 +2,7 @@
 Name : extStubser
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.32660
+Saveversion : 2022.35320
 Info Header End'''
 import ast
 from pathlib import Path
@@ -45,7 +45,6 @@ class extStubser:
 
 	
 	def StubifyDat(self, target:textDAT, includePrivate:bool = False, includeUnpromoted:bool = True):
-		debug( "Stubifying Dat", target.name)
 		self._placeTyping(
 			self.Stubify(
 				target.text, 
@@ -54,9 +53,8 @@ class extStubser:
 			target.name )
 
 	def StubifyComp(self, target:COMP, depth = 1, tag = "stubser", includePrivate:bool = False, includeUnpromoted:bool = True):
-		debug( "Stubifying COMP", target.name )
 		for child in target.findChildren( 
-				tags=[ tag ], 
+				tags=tdu.split( self.ownerComp.par.Tag.eval() ), 
 				type=textDAT, 
 				maxDepth = depth ):
 			
