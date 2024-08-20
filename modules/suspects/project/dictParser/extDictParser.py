@@ -33,6 +33,10 @@ class extDictParser:
 	def dataTable(self) -> tableDAT:
 		return self.ownerComp.op("repoMaker").Repo 
 	
+	@property
+	def NumItems(self) -> int:
+		return self.dataTable.numRows - 1
+
 	def Refresh(self):
 		self.getDefintion.cache_clear()
 		self.getDefintion()
