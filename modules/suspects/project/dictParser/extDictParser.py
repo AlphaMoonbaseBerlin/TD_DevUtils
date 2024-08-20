@@ -97,9 +97,9 @@ class extDictParser:
 			rows, list(itemDefinition.keys())
 		)
 		result = {
-			item.name : item.unparse( 
-				str( self.outputTable[ itemId, item.name] ) 
-			) for item in itemDefinition.values() if item.name in fetchNames
+			itemDefinition[name].name : itemDefinition[name].unparse( 
+				str( self.outputTable[ itemId, itemDefinition[name].name] ) 
+			) for name in fetchNames
 		}
 		result["_tableIndex"] = self.outputTable[ itemId, 0].row
 		return result
