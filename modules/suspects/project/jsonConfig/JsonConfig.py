@@ -2,7 +2,7 @@
 Name : JsonConfig
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.35320
+Saveversion : 2023.11880
 Info Header End'''
 
 
@@ -21,12 +21,18 @@ class JsonConfig:
 		self.ownerComp = ownerComp
 		self.log = self.ownerComp.op("logger").Log
 		self.log("Init")
-		self.Data = {}
+		self._Data = tdu.Dependency(
+			config_module.CollectionDict()
+		)
 		self.ConfigModule = config_module
 		self.LoadConfig()
-
+		
 		#backwards compatible 
 		self.Refresh_File = self.LoadConfig
+
+	@property
+	def Data(self):
+		return self._Data.val
 
 	@property
 	def Filepath(self):
@@ -45,12 +51,12 @@ class JsonConfig:
 		
 	def LoadConfig(self, configString = ""):
 		self.log("Refreshing File")
-		self.Data = self.loadFromJson( 
+		self._Data.val = self.loadFromJson( 
 			configString or
 			self.ownerComp.op("callbackManager").Do_Callback("GetConfigData") or
 			self.readFileJson() or 
 			"{}" )
-		if self.ownerComp.extensionsReady : self.ownerComp.cook( force = True )
+		# if self.ownerComp.extensionsReady : self.ownerComp.cook( force = True )
 		self.Save()
 
 	def Save(self):
