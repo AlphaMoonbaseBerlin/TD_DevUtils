@@ -2,7 +2,7 @@
 Name : config_module
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.35320
+Saveversion : 2023.11880
 Info Header End'''
 
 _debug = op("logger").Log
@@ -153,6 +153,9 @@ class CollectionDict(dict, _copyCallable):
         for key, item in data.items():
             if key in self: self[key].Set( item )
 
+    def byIndex(self, index:int):
+        return self[list(self.keys())[index]]
+
     def _GetSchema(self):
         return {
             "description" : self.comment,
@@ -172,6 +175,9 @@ class NamedList(dict, _copyCallable):
         self.comment = comment
         self.default_member = ConfigValue() if default_member is None else default_member 
         if items: self.Set( items )
+
+    def byIndex(self, index:int):
+        return self[list(self.keys())[index]]
 
     def __getattr__(self, key):
         try:
