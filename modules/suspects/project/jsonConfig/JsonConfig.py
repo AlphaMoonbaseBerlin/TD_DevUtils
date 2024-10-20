@@ -59,13 +59,18 @@ class JsonConfig:
 		# if self.ownerComp.extensionsReady : self.ownerComp.cook( force = True )
 		self.Save()
 
-	def Save(self):
-		self.log("Saving File")
+	def Save(self, force = False):
+		self.log("Saving Schema")
 		if self.ownerComp.par.Exportschema.eval():
 			self.saveSchema()
 			self.Data["$schema"] = f"./" + str( self.Filepath.with_suffix(".schema.json" ).name )
 
+		if self.ownerComp.par.Readonly.eval() and not force: 
+			self.log("Read onlymode activated, not overwriting file!")
+			return
+		
 		with open( self.Filepath, "wt" ) as configFile:
+			self.log(f"Saving Schema to {self.Filepath}" )
 			configFile.write( self.Data.To_Json() )
 		#self.log("Saved File", self.Data.To_Json())
 	
