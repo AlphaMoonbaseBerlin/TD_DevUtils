@@ -2,7 +2,7 @@
 Name : repositoryMaker
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.35320
+Saveversion : 2023.11880
 Info Header End'''
 
 class repositoryMaker:
@@ -57,7 +57,14 @@ class repositoryMaker:
 	@property
 	def Repo(self):
 		if self.Initialized:
-			if self.ownerComp.par.Autocreate.eval() and self.repoParameterVal == self.prefabOperator: self.Create_Repo()
+			if self.ownerComp.par.Autocreate.eval() and self.repoParameterVal == self.prefabOperator: 
+				self.Create_Repo()
+			
+			if self.repoParameter.eval() is None: 
+				# This fixes the NONE Definition for one frame on delete but results in other unexpected behaviour.
+				# Needs to be tested!
+				self.Reset()
+
 			return self.repoParameterVal
 		return None
 
@@ -69,10 +76,10 @@ class repositoryMaker:
 	def Initialized(self):
 		return hasattr( self.Owner.par, self.OperatorParName )
 
-	def Reevaluate(self):
-		if self.Owner.par[ self.OperatorParName ].eval(): return
-		self.Owner.par[ self.OperatorParName ].val = self.prefabOperator
-		return
+	# def Reevaluate(self):
+	# 	if self.Owner.par[ self.OperatorParName ].eval(): return
+	# 	self.Owner.par[ self.OperatorParName ].val = self.prefabOperator
+	# 	return
 
 	def Create_Repo(self):
 		x_offset 	= 0
