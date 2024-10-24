@@ -31,6 +31,23 @@ position = CollectionDict({
         comment = "x Position."),
 })
 
+from pathlib import Path
+def file( filepath ):
+    pathObject = Path( filepath )
+    return EnumValue(
+        "", allowedValues=[
+            str(filepath) for filepath in pathObject.iterdir() if filepath.is_file()
+        ]
+    )
+
+def folder( filepath ):
+    pathObject = Path( filepath )
+    return EnumValue(
+        "", allowedValues=[
+            str(filepath) for filepath in pathObject.iterdir() if filepath.is_dir()
+        ]
+    )
+
 def fromParameter(parameter:Par):
     if parameter.style.lower() in ["float", "in",
                            "rgb", "rgba", 
@@ -51,25 +68,30 @@ def fromParameter(parameter:Par):
     return ConfigValue(
         str( parameter.default )
     )
-    return
 
-def fromSequence( parsequence:Sequence):
-    # Should we work us off of the existing items? Yeaah, think so.
+def fromBlock( parBlock ):
     return CollectionDict({
-        str(index) : fromParGroup( block.parGroup ) for block in enumerate( parsequence.blocks )
+        pargroup.name : fromParGroup( pargroup ) for pargroup in parBlock
     })
 
-def fromParGroup( pargroup:ParGroup):
+def fromSequence( pargroup:Sequence ):
+    # Should we work us off of the existing items? Yeaah, think so.
+    parsequence = pargroup.sequence
+    return CollectionDict({
+        str(index) : fromBlock( block ) for index,block in enumerate( parsequence.blocks )
+    }, comment = pargroup.help)
+
+def fromParGroup( pargroup:ParGroup ):
     if pargroup.isSequence: return fromSequence( pargroup )
-    if pargroup.sequence: return
     if len(pargroup) > 1: return CollectionDict({
         parameter.name : fromParameter( parameter ) 
         for parameter in pargroup
     })
     return fromParameter( pargroup[0] )
 
-def fromCOMP( operator:COMP):
+def fromCOMP( operator:COMP ):
     return CollectionDict({
         parGroup.name : fromParGroup( parGroup ) 
-        for parGroup in operator.customParGroups
-    })
+        for parGroup in operator.customParGroups if parGroup.isSequence or parGroup.sequence is None
+       
+    },  comment = operator.comment)
