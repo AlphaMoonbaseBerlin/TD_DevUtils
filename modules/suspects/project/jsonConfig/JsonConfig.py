@@ -10,7 +10,7 @@ import json
 import pathlib
 
 import config_module
-
+import cookbook
 
 class JsonConfig:
 	"""
@@ -19,6 +19,7 @@ class JsonConfig:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
+		self.Cookbook = cookbook
 		self.log = self.ownerComp.op("logger").Log
 		self.log("Init")
 		self._Data = tdu.Dependency(
