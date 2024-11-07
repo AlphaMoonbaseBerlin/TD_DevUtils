@@ -5,7 +5,7 @@
 Name : extCallbackManager
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.32660
+Saveversion : 2023.11880
 Info Header End'''
 
 from functools import lru_cache
@@ -61,6 +61,25 @@ class extCallbackManager:
 		return getattr( self.callbackModule, name, self.empty_callback)
 
 	def Do_Callback(self, name, *arguments, **keywordarguments):
+		if self.ownerComp.par.Cache.eval():
+			return self._Cached_Do_Callback(
+				name, self.moduleOperator.text,
+				*arguments,
+				**keywordarguments
+			)
+		else:
+			return self._Do_Callback( 
+				name, 
+				*arguments, 
+				**keywordarguments
+			)
+
+
+	@lru_cache(maxsize=1)
+	def _Cached_Do_Callback(self, name, datText, *arguments, **keywordarguments):
+		return self._Do_Callback( name, *arguments, **keywordarguments)
+	
+	def _Do_Callback(self, name, *arguments, **keywordarguments):
 		try:
 			return self.Execute(name)(*arguments, **keywordarguments)
 		except Exception as e:
