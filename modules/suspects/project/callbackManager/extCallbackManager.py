@@ -37,9 +37,6 @@ class extCallbackManager:
 	def Reset(self):
 		self.owner.par.Callbacks = self.callbackTemplate
 
-	def Refresh(self):
-		self.Execute.cache_clear()
-
 	def InitOwner(self):
 		prefab = { parameter.name : TDJSON.parameterToJSONPar( parameter ) for parameter  in self.ownerComp.op("parameter_prefab").customPars }
 		try:
@@ -56,9 +53,14 @@ class extCallbackManager:
 	def empty_callback(self, *args, **kwargs):
 		return
 	
-	@lru_cache(maxsize=None)
-	def Execute(self, name):
+	@lru_cache(maxsize=64)
+	def _Execute(self, name, key):
 		return getattr( self.callbackModule, name, self.empty_callback)
+
+	def Execute(self, name):
+		return self._Execute(
+			name, self.moduleOperator.text
+		)
 
 	def Do_Callback(self, name, *arguments, **keywordarguments):
 		if self.ownerComp.par.Cache.eval():
@@ -75,7 +77,7 @@ class extCallbackManager:
 			)
 
 
-	@lru_cache(maxsize=1)
+	@lru_cache(maxsize=64)
 	def _Cached_Do_Callback(self, name, datText, *arguments, **keywordarguments):
 		return self._Do_Callback( name, *arguments, **keywordarguments)
 	
