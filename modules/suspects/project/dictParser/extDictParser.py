@@ -2,7 +2,7 @@
 Name : extDictParser
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.35320
+Saveversion : 2023.11880
 Info Header End'''
 
 
@@ -59,85 +59,94 @@ class extDictParser:
 			])
 		return { item.name : item for item in definitionList }
 	
-	def AddItem(self, data:dict, unique = True):
+	def AddItem(self, data:dict, unique = True, _dataTable = None):
 		"""
 			Passes a dict to the parser-functions and saves it to the table.
 			When unique is enabled it will overwrite existing entries with the same
 			primary key.
 		"""
+		dataTable = _dataTable or self.dataTable
 		dataset = [ item.parse( data ) for item in self.getDefintion().values() ]
 		if not dataset: raise Exception("No Definition defined!")
-		if unique and self.dataTable.row( dataset[0] ):
-			self.dataTable.replaceRow( dataset[0], dataset )
+		if unique and dataTable.row( dataset[0] ):
+			dataTable.replaceRow( dataset[0], dataset )
 		else:
-			self.dataTable.appendRow( dataset )
+			dataTable.appendRow( dataset )
 
-	def UpdateItem(self, itemId:Union[str, int], dataset:dict):
+	def UpdateItem(self, itemId:Union[str, int], dataset:dict, _dataTable = None):
 		"""
 			Replaces the data in the table at the given ID with the dataset given.
 		"""
-		self.dataTable.replaceRow( itemId, dataset )
+		dataTable = _dataTable or self.dataTable
+		dataTable.replaceRow( itemId, dataset )
 
-	def AddItems(self, data:List[dict], unique = True):
+	def AddItems(self, data:List[dict], unique = True, _dataTable = None):
 		"""
 			Ads a list of dicts.
 		"""
 		for item in data:
-			self.Additem( item, unique=unique )
+			self.Additem( item, unique=unique, _dataTable = _dataTable )
 
 
 	def GetRow(self, rowIndex:entryIndex):
 		"""Deprecated, used GetItem instead"""
 		return {
-			item.name : item.unparse( str( self.outputTable[ rowIndex, item.name] ) ) for item in self.getDefintion().values() 
+			item.name : item.unparse( 
+				str( self.outputTable[ rowIndex, item.name] ) 
+			) for item in self.getDefintion().values() 
 		}
 	
-	def GetItem(self, itemId:str, rows = "*") -> dict:
+	def GetItem(self, itemId:str, rows = "*", _dataTable = None) -> dict:
 		"""
 			Get a single items as a dict.
 		"""
+		outputTable = _dataTable or self.outputTable
+
 		itemDefinition = self.getDefintion()
 		fetchNames = tdu.match(
 			rows, list(itemDefinition.keys())
 		)
 		result = {
 			itemDefinition[name].name : itemDefinition[name].unparse( 
-				str( self.outputTable[ itemId, itemDefinition[name].name] ) 
+				str( outputTable[ itemId, itemDefinition[name].name] ) 
 			) for name in fetchNames
 		}
-		result["_tableIndex"] = self.outputTable[ itemId, 0].row
+		result["_tableIndex"] = outputTable[ itemId, 0].row
 		return result
 	
-	def DeleteItem(self, itemId:str):
+	def DeleteItem(self, itemId:str, _dataTable = None):
 		"""
 			Delete an item based on the ID. Returns True or False depending of success.
 		"""
 		try:
-			self.dataTable.deleteRow( str(itemId) )
+			dataTable = _dataTable or self.dataTable
+			dataTable.deleteRow( str(itemId) )
 			return True
 		except tdError:
 			return False
 
-	def SearchItems(self, key = lambda value: True, rows = "*") -> List[Dict]:
+	def SearchItems(self, key = lambda value: True, rows = "*", _dataTable = None) -> List[Dict]:
 		"""
 			Search Items in the table based on the key-function returning true or false.
 			Use rows arguments to filter returned data.
 		"""
+		dataTable = _dataTable or self.dataTable
 		returnData = []
-		for idCell in self.dataTable.col(0)[1:]:
+		for idCell in dataTable.col(0)[1:]:
 			item = self.GetItem( idCell.val, rows = rows )
 			if key(item): returnData.append( item )
 		return returnData
 
-	def SortTable(self, key = lambda row: row[0], reverse = False) -> bool:
+	def SortTable(self, key = lambda row: row[0], reverse = False, _dataTable = None) -> bool:
 		"""
 			Sorts the table based on the key-function. This works on the table
 			holding the data and does not change the data.
 		"""
+		dataTable = _dataTable or self.dataTable
 		sortedData = sorted(
-    		[[cell.val for cell in row] for row in self.dataTable.rows()[1:]], 
+    		[[cell.val for cell in row] for row in dataTable.rows()[1:]], 
 			key = key,
 			reverse=reverse
 		)
-		self.dataTable.clear(keepFirstRow = True)
-		self.dataTable.appendRows( sortedData )
+		dataTable.clear(keepFirstRow = True)
+		dataTable.appendRows( sortedData )
