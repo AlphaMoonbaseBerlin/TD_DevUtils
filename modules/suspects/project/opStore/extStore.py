@@ -5,8 +5,20 @@
 Name : extStore
 Author : Wieland@AMB-ZEPH15
 Saveorigin : Project.toe
-Saveversion : 2022.32660
+Saveversion : 2023.11880
 Info Header End'''
+
+class opProperty:
+	def __init__(self, operator):
+		self._operator = operator
+
+	
+	def __get__(self, instance, owner):
+		debug(instance, owner)
+		return self._operator
+	
+	def __call__(self, *args, **kwds):
+		return self._operator.op(args[0])
 
 class extStore:
 	"""
@@ -23,9 +35,12 @@ class extStore:
 
 	def parseTable(self, table):
 		for row in table.rows()[1:]:
-			row[0].val = tdu.legalName( row[0].val ).capitalize()
-			row[1].val = self.getPath( self.getOperator( row[1].val ) )
-			setattr( self, row[0].val, self.getOperator( row[1].val ) )
+			targetOperator = self.getOperator( row[1].val )
+			targetName = tdu.legalName( row[0].val ).capitalize()
+			row[0].val = targetName
+			row[1].val = self.getPath( targetOperator )
+
+			setattr( self, targetName, opProperty( targetOperator) )
 			
 	def AddOp(self, operator, shortcut_name = None):
 		shortcut_name = operator.name if shortcut_name is None else shortcut_name
