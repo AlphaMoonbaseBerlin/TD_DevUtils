@@ -23,7 +23,6 @@ class callTimer(object):
 		return self.name
 	def __exit__(self, type, value, traceback):
 		op("timing").appendRow((
-			"TIMING CHECK", 
 			self.name,
 			(datetime.datetime.now() - self.start)
 		))
@@ -33,8 +32,7 @@ class extLogger:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
-		os.makedirs( "logs", exist_ok = True )
-
+		
 	def get_stack_element(self, stack):
 		try:
 			return stack.pop( self.ownerComp.par.Traceoffset.eval() )
@@ -66,9 +64,11 @@ class extLogger:
 		if self.ownerComp.par.Textport.eval(): 
 			with callTimer("textport"):
 				self.to_Textport( dataset )
+				
 		if self.ownerComp.par.Textfileoutput.eval(): 
 			with callTimer("Textfile"):
 				self.to_Text_File( dataset )
+
 		if self.ownerComp.par.Jsonfileoutput.eval():
 			with callTimer("JSON File"):
 				self.to_Json_File( dataset )
@@ -77,20 +77,17 @@ class extLogger:
 			with callTimer("Database"):
 				self.to_Database( dataset )
 			
-				
 		self.ownerComp.op('fifo1').appendRow( tuple(dataset.values()) )
 		return
 
 	def to_Textport(self, dataset):
 		# LoggerExt.Log(message: str, level: str, withInfos: bool = True, **logItemDict: dict) -> None
-		logItemDict = {
-			"source" : f"{self.ownerComp.par.Logname.eval()}:{self.ownerComp.path}",
-			"absFrame" : dataset["timestamp"]
-		}
-		op.TDResources.TDAppLogger.Log(
-			json.dumps(dataset, indent=1),
+		self.ownerComp.par.Logger.eval().Log(
+			json.dumps({
+				"source" : f"{self.ownerComp.par.Logname.eval()}:{self.ownerComp.path}",
+				**dataset
+				}, indent=1),
 			level = dataset["level"],
-			logItemDict = logItemDict,
 			withInfos = False
 		)
 	

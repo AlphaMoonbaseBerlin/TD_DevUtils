@@ -51,21 +51,23 @@ class extSqliteAdapter:
 		return cursor
 	
 	def Commit(self, cursor:sqlite3.Cursor):
-		return
 		self.log("Comitting Cursor")
 		self.committedConnections.add( cursor.connection )
 		if not self.checkDelay:
 			self.log("Starting checkDelay")
 			self.checkDelay = run(
-				"args[0]()", self._check, delayFrames = 1, endFrame = True
+				self._check, delayFrames = 1, endFrame = True
 			)
 	
-	def _check(self):
-		self.log("Running commitmentthread")
-		Thread(target=self._threadCommit, args = (self.committedConnections.copy(),) ).start()
-		
-		# for connection in self.committedConnections:
-		#	connection.commit()
+	def _check(self):	
+		match self.ownerComp.par.Commitmode.eval():
+			case "Thread":
+				self.log("Starting thread for committing.")
+				Thread(target=self._threadCommit, args = (self.committedConnections.copy(),) ).start()
+			case "Serial":
+				self.log("Comitting directy.")
+				for connection in self.committedConnections:
+					connection.commit()
 		
 		self.committedConnections.clear()
 		self.checkDelay = None
