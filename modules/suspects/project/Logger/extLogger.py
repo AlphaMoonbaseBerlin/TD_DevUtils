@@ -12,7 +12,21 @@ from pathlib import Path
 import json
 import logging
 import sqlite3
-from functools import lru_cache
+from functools import cached_property
+
+
+class callTimer(object):
+	def __init__(self, name):
+		self.start = datetime.datetime.now()
+		self.name = name
+	def __enter__(self):
+		return self.name
+	def __exit__(self, type, value, traceback):
+		debug(
+			"TIMING CHECK", 
+			self.name,
+			(datetime.datetime.now() - self.start)
+		)
 
 class extLogger:
 
@@ -33,42 +47,50 @@ class extLogger:
 
 	def Log(self, *messages, level = "INFO"):
 		stack = inspect.stack()
-		dataset = [ level, datetime.datetime.now().isoformat()	]
 		
 		debugged_stack = self.get_stack_element(stack)
 		caller_stack =  self.get_stack_element(stack)
-		
-		dataset.append( self.format_stack_element( caller_stack ))
-		dataset.append( self.format_stack_element( debugged_stack ) )
 
-		messages = ( 
+		_messages = ( 
 			json.dumps( message ) if isinstance( message, (dict, list, tuple)) else message 
 			for message in messages 
 		)
-
-		for message in messages: dataset.append( f"{message};" )
-		if self.ownerComp.par.Textport.eval(): 
-			self.to_Textport( dataset )
-		if self.ownerComp.par.Textfileoutput.eval(): 
-			self.to_Text_File( dataset )
-		if self.ownerComp.par.Jsonfileoutput.eval():
-			self.to_Json_File( dataset )
-		if self.ownerComp.par.Sqliteoutput.eval():
-			self.to_Database( dataset )
+		dataset = {
+			"level" : level,
+			"timestamp" : datetime.datetime.now().isoformat(),
+			"debugged" : self.format_stack_element( debugged_stack ),
+			"caller" : self.format_stack_element( caller_stack ),
+			"messages" : tuple( _messages )
+		}
 		
-		self.ownerComp.op('fifo1').appendRow( dataset )
+		if self.ownerComp.par.Textport.eval(): 
+			with callTimer("textport"):
+				self.to_Textport( dataset )
+		if self.ownerComp.par.Textfileoutput.eval(): 
+			with callTimer("Textfile"):
+				self.to_Text_File( dataset )
+		if self.ownerComp.par.Jsonfileoutput.eval():
+			with callTimer("JSON File"):
+				self.to_Json_File( dataset )
+			
+		if self.ownerComp.par.Sqliteoutput.eval():
+			with callTimer("Database"):
+				self.to_Database( dataset )
+			
+				
+		self.ownerComp.op('fifo1').appendRow( tuple(dataset.values()) )
 		return
 
 	def to_Textport(self, dataset):
 		# LoggerExt.Log(message: str, level: str, withInfos: bool = True, **logItemDict: dict) -> None
 		logItemDict = {
 			"source" : f"{self.ownerComp.par.Logname.eval()}:{self.ownerComp.path}",
-			"absFrame" : dataset[1]
+			"absFrame" : dataset["timestamp"]
 		}
 		op.TDResources.TDAppLogger.Log(
-			"\n".join(dataset[1:]),
-			level = dataset[0],
-			#logItemDict = logItemDict,
+			json.dumps(dataset, indent=1),
+			level = dataset["level"],
+			logItemDict = logItemDict,
 			withInfos = False
 		)
 	
@@ -89,7 +111,7 @@ class extLogger:
 
 	def to_Text_File(self, dataset):
 		debug_string = self.ownerComp.path
-		for element in dataset:
+		for element in dataset.values():
 			debug_string += f"{element}\t"
 		debug_string += '\n'
 		os.makedirs( self.ownerComp.par.Folder.eval(), exist_ok=True)
@@ -110,49 +132,38 @@ class extLogger:
 		with jsonFileObject.open("r+b") as jsonFileWriter:
 			jsonFileWriter.seek(-1, 2)
 			jsonFileWriter.write(",".encode(encoding="ascii"))
-			jsonFileWriter.write(json.dumps({
-				"level" : dataset[0],
-				"timestamp" : dataset[1],
-				"debugged" : dataset[2],
-				"caller" : dataset[3],
-				"messages" : dataset[4:]
-			},ensure_ascii=True).encode(encoding="ascii"))
+			jsonFileWriter.write(json.dumps(dataset,ensure_ascii=True).encode(encoding="ascii"))
 			jsonFileWriter.write(b"]")
 		return
 	
+	@cached_property
+	def _sqliteCursor(self):
+		with callTimer("Get Cursor"):
+			return self.ownerComp.op("adapterDependency").GetGlobalComponent().GetCursor(
+				self.ownerComp.par.Sqlitedatabase.eval(),
+				logs = (
+						"source TINYTEXT",
+						"level TINYTEXT",
+						"timestamp DATE",
+						"caller TINYTEXT",
+						"debugged_element TINYTEXT",
+						"messages TEXT"
+				)
+			)
 
 	def to_Database(self, dataset):
-		databasePathObject = Path(
-			
-			self.ownerComp.par.Sqlitedatabase.eval()
-		)
-		if not databasePathObject.is_file():
-			databasePathObject.parent.mkdir( exist_ok=True, parents=True)
-			connector = sqlite3.connect(databasePathObject)
-			cursor = connector.cursor()
-			cursor.execute("CREATE TABLE info(loggerversion)")
-			cursor.execute("CREATE TABLE logs(source, level, timestamp, caller, debugged_element, messages)")
-			cursor.execute("""INSERT INTO info VALUES(?)""", (self.ownerComp.par.Vcversion.eval(),))
-			connector.commit()
-			cursor.close()
-			connector.close()
-		
-		connector = sqlite3.connect(databasePathObject)
-		cursor = connector.cursor()
-		cursor.execute("INSERT INTO logs VALUES(?,?,?,?,?,?)", 
-				( 	self.ownerComp.par.Logname.eval(), 
-	 				dataset[0], 
-					dataset[1], 
-					dataset[2], 
-					dataset[3], 
-					"\n".join(dataset[4:]) )
-		)
-		connector.commit()
-		cursor.close()
-		connector.close()
-		
+		with callTimer("Fetching Cursor"):
+			cursor:sqlite3.Cursor = self._sqliteCursor
 
-		
-
-		
+		with callTimer("Execute Insert"):
+			cursor.execute("INSERT INTO logs VALUES(?,?,?,?,?,?)", 
+					( 	self.ownerComp.par.Logname.eval(), 
+						dataset["level"], 
+						dataset["timestamp"], 
+						dataset["caller"], 
+						dataset["debugged"], 
+						"\n".join(dataset["messages"]) )
+			)
+		with callTimer("Comitting"):
+			self.ownerComp.op("adapterDependency").GetGlobalComponent().Commit( cursor )
 		return
