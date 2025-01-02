@@ -37,16 +37,24 @@ class extSqliteAdapter:
 
 		connector = sqlite3.connect(
 			databasePathObject, 
-			check_same_thread = False #YOLO!!
+			check_same_thread = False #YOLO!!,
+
 			)
 
-		cursor = connector.cursor()
+		cursor = connector.cursor(
+			# factory=? # Here we might want to create our own cursor instead, 
+			# allowing us to log each transaction 
+			# to then later pickle and provide.
+			# this shit is hard...
+		)
+
 		for key, value in requiredTables.items():
 			cursor.execute(f"""
 				 CREATE TABLE 
 				 IF NOT EXISTS 
 				 {key}({','.join(value)})
 				 """)
+
 		self.log("Returning Cursor")
 		return cursor
 	
@@ -68,7 +76,18 @@ class extSqliteAdapter:
 				self.log("Comitting directy.")
 				for connection in self.committedConnections:
 					connection.commit()
-		
+			case "Subprocess":
+				"""
+					This might not be worth the effort. Here is the idea:
+					Lets fetch all committed transactions from the connection (inseadt of commiting)
+					Pickle the transactions in to a bytestream
+					Put that bytestream in to a shared memory.
+					Read the share memory from the subprocess and commit it there instead of here.
+					check if the subprocess is terminated using asyncIO operation
+					`????
+					profit
+				"""
+				pass
 		self.committedConnections.clear()
 		self.checkDelay = None
 		self.log("Cleared and thread running.")
