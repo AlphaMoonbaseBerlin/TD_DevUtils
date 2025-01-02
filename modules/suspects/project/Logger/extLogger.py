@@ -22,11 +22,11 @@ class callTimer(object):
 	def __enter__(self):
 		return self.name
 	def __exit__(self, type, value, traceback):
-		debug(
+		op("timing").appendRow((
 			"TIMING CHECK", 
 			self.name,
 			(datetime.datetime.now() - self.start)
-		)
+		))
 
 class extLogger:
 
@@ -154,7 +154,7 @@ class extLogger:
 	def to_Database(self, dataset):
 		with callTimer("Fetching Cursor"):
 			cursor:sqlite3.Cursor = self._sqliteCursor
-
+		
 		with callTimer("Execute Insert"):
 			cursor.execute("INSERT INTO logs VALUES(?,?,?,?,?,?)", 
 					( 	self.ownerComp.par.Logname.eval(), 
